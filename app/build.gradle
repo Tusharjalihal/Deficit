@@ -1,0 +1,45 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'in.deficitcoach.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'in.deficitcoach.app'
+        minSdk 24
+        targetSdk 34
+        // Each GitHub Actions run gets a higher number, so new APKs install as updates.
+        versionCode((System.getenv('GITHUB_RUN_NUMBER') ?: '1') as int)
+        versionName "1.0.${System.getenv('GITHUB_RUN_NUMBER') ?: '0'}"
+    }
+
+    signingConfigs {
+        // The key comes from the KEYSTORE_BASE64 secret (decoded by the workflow), so it is
+        // never stored in this public repo. Same key every build = updates keep the user's data.
+        release {
+            storeFile file(System.getenv('KEYSTORE_PATH') ?: 'release.keystore')
+            storePassword System.getenv('KEYSTORE_PASSWORD') ?: 'deficitcoach'
+            keyAlias System.getenv('KEY_ALIAS') ?: 'deficitcoach'
+            keyPassword System.getenv('KEYSTORE_PASSWORD') ?: 'deficitcoach'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
